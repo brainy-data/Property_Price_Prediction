@@ -1,0 +1,33 @@
+## Some quicknote for my own reference 
+
+## Technique used in data cleansing
+
+# Drop District 6
+Average_monthly_df_drop = Average_monthly_df[Average_monthly_df['Postal District'] != 6]
+
+#Input missing datapoint
+# make it as a pivot table
+pivot = Average_monthly_df_drop.pivot(index='Month_Year', columns = 'Postal District', values = 'Unit Price ($ psf)')
+#Fill in missing values
+pivot.fillna(method='ffill', inplace=True)
+#Back to an array
+Average_monthly_df_filled = pivot.stack().reset_index()
+Average_monthly_df_filled.sort_values(['Postal District', 'Month_Year'])
+#To check
+Average_monthly_df_filled['Postal District'].value_counts()
+
+
+# MAPE for an arima model
+
+# split the data
+        train_size = round(0.9 * len(Average_monthly_df_filled[(Average_monthly_df_filled['Postal District'] == i)]))
+        test_size = round(0.1 * len(Average_monthly_df_filled[(Average_monthly_df_filled['Postal District'] == i)]))
+        train = Average_monthly_df_filled[(Average_monthly_df_filled['Postal District'] == i)][:train_size]
+        test = Average_monthly_df_filled[(Average_monthly_df_filled['Postal District'] == i)][train_size:]
+        
+   
+# calculate MAPE
+pred = model.predict(test_size)
+Test = pd.DataFrame()
+Test['pred'] = list(pred)
+MAPE_ij = mape(list(test['log_psf']), Test['pred']) 
